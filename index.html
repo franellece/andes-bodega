@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f284e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Andes Bodega">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Andes · Bodega</title>
+<style>
+:root{--navy:#0f284e;--navy2:#1d3d6e;--ink:#17202e;--muted:#5d6878;--line:#d9dee6;--paper:#f3f5f8;--white:#fff;
+  --ok:#1c6b39;--okbg:#e3f3e8;--warn:#8a6100;--warnbg:#fbf3d3;--err:#a3241a;--errbg:#fbe4e2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--navy2);outline-offset:2px}
+header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+header .fila{display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;margin:0;font-weight:600;flex:1;line-height:1.2}
+header .atras{background:none;border:0;color:#fff;font-size:26px;padding:0 8px 0 0;cursor:pointer}
+.estado-red{font-size:13px;opacity:.9;margin-top:4px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.estado-red b{font-weight:600}
+.estado-red button{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer}
+main{padding:14px 14px calc(110px + env(safe-area-inset-bottom,0px));max-width:640px;margin:0 auto}
+.vacio{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+.bodega-btn{display:block;width:100%;text-align:left;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px;font-size:18px;font-weight:600;cursor:pointer}
+.bodega-btn span{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:2px}
+.bodega-btn.hoy{border-left:5px solid var(--ok)}
+.persona{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.link{background:none;border:0;color:var(--navy2);font-weight:600;cursor:pointer;padding:6px}
+.buscar{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;margin-bottom:10px;background:#fff}
+.progreso{font-size:14px;color:var(--muted);margin:2px 0 12px}
+h2{font-size:14px;color:var(--muted);font-weight:600;margin:18px 4px 8px}
+.item{background:var(--white);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.item.hecho{border-left-color:var(--ok)}
+.item .tit{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.item .tit b{font-size:17px}
+.nohay{background:none;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;color:var(--muted);cursor:pointer}
+.nohay[aria-pressed=true]{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.fmt{display:flex;align-items:center;gap:8px;padding:6px 0}
+.fmt label{flex:1;font-size:15px}
+.stp{display:flex;align-items:center}
+.stp button{width:52px;height:52px;border:1px solid var(--line);background:var(--paper);font-size:26px;font-weight:600;cursor:pointer;touch-action:manipulation}
+.stp button:first-child{border-radius:10px 0 0 10px}.stp button:last-child{border-radius:0 10px 10px 0}
+.stp input{width:68px;height:52px;border:1px solid var(--line);border-left:0;border-right:0;text-align:center;font-size:21px;font-weight:600;background:#fff}
+.stp input::placeholder{color:#b3bac5;font-weight:400}
+.barra{position:fixed;left:0;right:0;bottom:0;background:var(--white);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.barra button{width:100%;max-width:640px;display:block;margin:0 auto;background:var(--navy);color:#fff;border:0;border-radius:12px;padding:16px;font-size:18px;font-weight:600;cursor:pointer}
+.barra button:disabled{background:#9aa6b8}
+.modal{position:fixed;inset:0;background:rgba(15,40,78,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.modal.abierto{display:flex}
+.hoja{background:#fff;width:100%;max-width:640px;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.hoja h3{margin:0 0 10px;font-size:19px}
+.hoja ul{padding-left:18px;margin:8px 0 14px}
+.hoja li{margin-bottom:4px}
+.acciones{display:flex;gap:10px}
+.acciones button{flex:1;padding:14px;border-radius:10px;font-weight:600;font-size:16px;cursor:pointer}
+.sec{background:#fff;border:1px solid var(--line)}
+.pri{background:var(--navy);color:#fff;border:0}
+.pri:disabled{background:#9aa6b8}
+.opcion{display:block;width:100%;text-align:left;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:8px;font-size:17px;cursor:pointer}
+.aviso{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:15px}
+.aviso.ok{background:var(--okbg);color:var(--ok)} .aviso.warn{background:var(--warnbg);color:var(--warn)} .aviso.err{background:var(--errbg);color:var(--err)}
+.codigo{width:100%;font-size:28px;letter-spacing:6px;text-align:center;padding:14px;border:1px solid var(--line);border-radius:12px;margin:10px 0 14px;background:#fff}
+.cola li small{color:var(--muted)}
+.pie{text-align:center;margin-top:18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="fila"><button class="atras" id="atras" hidden aria-label="Volver">‹</button><h1 id="titulo">Andes · Bodega</h1></div>
+  <div class="estado-red" id="red"></div>
+</header>
+<main id="main"></main>
+<div class="barra" id="barra" hidden><button id="enviar">Enviar</button></div>
+<div class="modal" id="modal"><div class="hoja" id="hoja"></div></div>
+
+<script>
+/* ======= CONFIGURACIÓN: pega aquí la URL /exec del proyecto Receptor ======= */
+const RECEPTOR = 'https://script.google.com/macros/s/AKfycby8zq2KYgBqa18N0jfP3aATnRwUjmyf9jlUZqJP6wsfPXDkI8nz_hG721Sf_LH_-rgj/exec';
+/* ========================================================================== */
+const K = { cfg: 'at3.config', cod: 'at3.codigo', per: 'at3.persona', cola: 'at3.cola', env: 'at3.enviados' };
+const L = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }, set: (k, v) => localStorage.setItem(k, JSON.stringify(v)) };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const corto = b => String(b).replace('BODEGA - ', '');
+let S = { bodega: null, enviando: false };
+
+function ahora() { const d = new Date(), p = n => String(n).padStart(2, '0'); return { fecha: `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`, hora: `${p(d.getHours())}:${p(d.getMinutes())}` }; }
+function dmy(iso) { const p = String(iso).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : iso; }
+function uid() { return (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)); }
+const cfg = () => L.get(K.cfg, null);
+const cola = () => L.get(K.cola, []);
+const kBorr = b => `at3.borrador.${b}`;
+
+/* ---------- Red y sincronización ---------- */
+function pintarRed() {
+  const c = cola(), n = c.filter(e => !e.error).length, err = c.filter(e => e.error).length;
+  $('red').innerHTML = `<span>${navigator.onLine ? '● Con señal' : '○ Sin señal: todo queda guardado en el teléfono'}</span>` +
+    (n ? `<b>⏳ ${n} por enviar</b>` : '') + (err ? `<b>⚠ ${err} con error</b>` : '') + ((n || err) ? '<button id="verCola">Ver</button>' : '');
+  if ($('verCola')) $('verCola').onclick = verCola;
+}
+async function sincronizar() {
+  if (S.enviando || !navigator.onLine || RECEPTOR.indexOf('http') !== 0) return pintarRed();
+  S.enviando = true;
+  try {
+    for (const env of cola().filter(e => !e.error)) {
+      let r;
+      try {
+        const res = await fetch(RECEPTOR, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(env) });
+        r = await res.json();
+      } catch (e) { break; } // sin red real: se reintenta después
+      const resto = cola().filter(x => x.id !== env.id);
+      if (r.ok) {
+        L.set(K.cola, resto);
+        const en = L.get(K.env, {}); en[env.bodega] = env.fecha; L.set(K.env, en);
+      } else if (r.codigo === 'CODIGO') { pedirCodigo('El código de equipo cambió. Escribe el código nuevo para enviar lo pendiente.'); break; }
+      else L.set(K.cola, resto.concat([Object.assign({}, env, { error: r.error || 'Error desconocido' })]));
+    }
+  } finally { S.enviando = false; pintarRed(); }
+}
+window.addEventListener('online', sincronizar);
+window.addEventListener('offline', pintarRed);
+setInterval(() => { if (cola().length) sincronizar(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && cola().length) sincronizar(); });
+
+function verCola() {
+  const c = cola();
+  abrirModal(`<h3>Conteos guardados en el teléfono</h3>
+    <ul class="cola">${c.map(e => `<li>${esc(corto(e.bodega))} · ${esc(dmy(e.fecha))} ${esc(e.hora)} · ${e.lineas.length} ítems
+      ${e.error ? `<br><small style="color:var(--err)">${esc(e.error)}</small>` : '<br><small>Se enviará solo cuando haya señal</small>'}</li>`).join('') || '<li>No hay envíos pendientes.</li>'}</ul>
+    <div class="acciones"><button class="sec" id="mCerrar">Cerrar</button>
+    ${c.some(e => e.error) ? '<button class="sec" id="mDescartar">Descartar con error</button>' : ''}
+    <button class="pri" id="mReint">Reintentar</button></div>`);
+  $('mCerrar').onclick = cerrarModal;
+  $('mReint').onclick = () => { L.set(K.cola, cola().map(e => { const x = Object.assign({}, e); delete x.error; return x; })); cerrarModal(); sincronizar(); };
+  if ($('mDescartar')) $('mDescartar').onclick = () => { if (confirm('¿Descartar los envíos con error? Se perderán.')) { L.set(K.cola, cola().filter(e => !e.error)); cerrarModal(); pintarRed(); } };
+}
+
+/* ---------- Configuración ---------- */
+async function traerConfig(codigo) {
+  const res = await fetch(`${RECEPTOR}?accion=config&c=${encodeURIComponent(codigo)}`);
+  const r = await res.json();
+  if (!r.ok) { const e = new Error(r.error); e.codigo = r.codigo; throw e; }
+  L.set(K.cod, codigo);
+  L.set(K.cfg, { bodegas: r.bodegas, items: r.items, equipo: r.equipo, actualizado: r.actualizado });
+  // Envíos detenidos por código antiguo: se reenvían con el nuevo
+  L.set(K.cola, cola().map(e => Object.assign({}, e, { c: codigo })));
+  return cfg();
+}
+function pedirCodigo(msg) {
+  abrirModal(`<h3>Código de equipo</h3><p style="color:var(--muted);margin-top:0">${esc(msg || 'Escríbelo una sola vez. Necesitas señal solo para este paso.')}</p>
+    <input class="codigo" id="mCod" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••••">
+    <div class="aviso err" id="mErr" hidden></div>
+    <div class="acciones">${cfg() ? '<button class="sec" id="mCerrar">Cancelar</button>' : ''}<button class="pri" id="mOk">Conectar</button></div>`);
+  if ($('mCerrar')) $('mCerrar').onclick = cerrarModal;
+  $('mOk').onclick = async () => {
+    const c = $('mCod').value.trim();
+    if (!c) return;
+    if (!navigator.onLine) { $('mErr').hidden = false; $('mErr').textContent = 'Sin señal. Hazlo arriba, donde haya internet.'; return; }
+    $('mOk').disabled = true; $('mOk').textContent = 'Conectando…';
+    try { await traerConfig(c); cerrarModal(); if (!L.get(K.per, '')) elegirPersona(inicio); else inicio(); sincronizar(); }
+    catch (e) { $('mErr').hidden = false; $('mErr').textContent = e.message || 'No se pudo conectar. Revisa la señal.'; $('mOk').disabled = false; $('mOk').textContent = 'Conectar'; }
+  };
+  setTimeout(() => $('mCod') && $('mCod').focus(), 50);
+}
+async function refrescarConfig() {
+  if (!navigator.onLine || !L.get(K.cod, '')) return;
+  try { await traerConfig(L.get(K.cod, '')); } catch (e) { if (e.codigo === 'CODIGO') pedirCodigo('El código de equipo cambió. Escribe el código nuevo.'); }
+}
+
+/* ---------- Modal ---------- */
+function abrirModal(html) { $('hoja').innerHTML = html; $('modal').classList.add('abierto'); }
+function cerrarModal() { $('modal').classList.remove('abierto'); }
+$('modal').onclick = e => { if (e.target.id === 'modal' && cfg()) cerrarModal(); };
+
+function elegirPersona(despues) {
+  const equipo = (cfg() || {}).equipo || [];
+  abrirModal(`<h3>¿Quién eres?</h3><p style="color:var(--muted);margin-top:0">Se recuerda en este teléfono.</p>
+    ${equipo.map(n => `<button class="opcion" data-n="${esc(n)}">${esc(n)}</button>`).join('')}
+    <button class="opcion" data-n="__otro">Otra persona…</button>`);
+  $('hoja').querySelectorAll('.opcion').forEach(b => b.onclick = () => {
+    let n = b.dataset.n;
+    if (n === '__otro') { n = (prompt('Escribe tu nombre y apellido') || '').trim(); if (!n) return; }
+    L.set(K.per, n); cerrarModal(); despues && despues();
+  });
+}
+
+/* ---------- Inicio: lista de bodegas ---------- */
+function inicio() {
+  S.bodega = null;
+  $('titulo').textContent = 'Andes · Bodega'; $('atras').hidden = true; $('barra').hidden = true;
+  const c = cfg();
+  if (!c) {
+    $('main').innerHTML = `<div class="vacio">Para empezar necesitas el <b>código de equipo</b> y señal (solo esta vez).<br><br>
+      <button class="pri" style="padding:14px 20px;border-radius:10px;font-weight:600" id="btnCod">Escribir código</button></div>`;
+    $('btnCod').onclick = () => pedirCodigo();
+    return;
+  }
+  const per = L.get(K.per, ''), env = L.get(K.env, {}), hoy = ahora().fecha, pend = new Set(cola().map(e => e.bodega));
+  $('main').innerHTML = `<div class="persona"><span>Contando como <b>${esc(per || '—')}</b></span><button class="link" id="cambiarPer">Cambiar</button></div>
+    <input class="buscar" id="buscar" type="search" placeholder="Buscar bodega…" aria-label="Buscar bodega">
+    <div id="listaBod"></div>
+    <p class="pie"><button class="link" id="actConfig">Actualizar lista de ítems</button> · <button class="link" id="cambCod">Cambiar código</button></p>`;
+  const pintar = () => {
+    const q = $('buscar').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+    $('listaBod').innerHTML = c.bodegas.filter(b => !q || b.toLowerCase().replace(/[^a-z0-9]/g, '').includes(q)).map(b => {
+      const ult = env[b], hecho = ult === hoy || (pend.has(b) && cola().some(e => e.bodega === b && e.fecha === hoy));
+      const borr = Object.keys(L.get(kBorr(b), {})).length;
+      return `<button class="bodega-btn${hecho ? ' hoy' : ''}" data-b="${esc(b)}">${esc(corto(b))}<span>${hecho ? '✓ Contada hoy' : ult ? 'Último conteo enviado: ' + esc(dmy(ult)) : 'Sin conteos desde este teléfono'}${pend.has(b) ? ' · ⏳ por enviar' : ''}${borr ? ' · borrador sin enviar' : ''}</span></button>`;
+    }).join('') || '<div class="vacio">Sin resultados.</div>';
+    $('listaBod').querySelectorAll('.bodega-btn').forEach(x => x.onclick = () => abrirBodega(x.dataset.b));
+  };
+  $('buscar').oninput = pintar; pintar();
+  $('cambiarPer').onclick = () => elegirPersona(inicio);
+  $('actConfig').onclick = async () => { if (!navigator.onLine) return alert('Necesitas señal para actualizar.'); await refrescarConfig(); inicio(); };
+  $('cambCod').onclick = () => pedirCodigo('Escribe el código de equipo.');
+}
+
+/* ---------- Conteo de una bodega ---------- */
+function abrirBodega(b) {
+  S.bodega = b;
+  if (!L.get(K.per, '')) return elegirPersona(() => abrirBodega(b));
+  $('titulo').textContent = corto(b); $('atras').hidden = false; $('barra').hidden = false;
+  pintarItems(); window.scrollTo(0, 0);
+}
+const contado = d => !!d && (d.cero || (d.c || []).some(x => x !== null && x !== undefined));
+function pintarItems() {
+  const c = cfg(), borr = L.get(kBorr(S.bodega), {});
+  const grupos = {}; c.items.forEach(i => (grupos[i.categoria] = grupos[i.categoria] || []).push(i));
+  const hechos = c.items.filter(i => contado(borr[i.item])).length;
+  $('main').innerHTML = `<div class="aviso warn">Cuenta lo que <b>queda</b> en la bodega. Solo números enteros. Un <b>bidón o caja abierta cuenta como 1</b>.</div>
+    <p class="progreso"><b id="nHechos">${hechos}</b> de ${c.items.length} ítems contados. Usa «No hay» si no queda nada.</p>` +
+    Object.keys(grupos).map(g => `<h2>${esc(g)}</h2>` + grupos[g].map(i => tarjeta(i, borr[i.item] || {})).join('')).join('');
+  actualizarBoton(hechos);
+  enlazar();
+}
+function tarjeta(i, d) {
+  const c = d.c || [];
+  return `<div class="item${contado(d) ? ' hecho' : ''}" data-i="${esc(i.item)}">
+    <div class="tit"><b>${esc(i.item)}</b><button class="nohay" data-a="cero" aria-pressed="${!!d.cero}">No hay</button></div>
+    ${i.formatos.map((f, k) => `<div class="fmt"><label for="in-${esc(i.item)}-${k}">${esc(f.nombre)}</label>
+      <div class="stp"><button data-a="menos" data-k="${k}" aria-label="Restar ${esc(f.nombre)}">−</button>
+      <input id="in-${esc(i.item)}-${k}" type="number" inputmode="numeric" pattern="[0-9]*" min="0" step="1" placeholder="–" data-k="${k}" value="${c[k] ?? ''}">
+      <button data-a="mas" data-k="${k}" aria-label="Sumar ${esc(f.nombre)}">+</button></div></div>`).join('')}
+  </div>`;
+}
+function guardar(item, fn) {
+  const b = L.get(kBorr(S.bodega), {}); const d = b[item] || { c: [], cero: false };
+  fn(d); b[item] = d; if (!contado(d)) delete b[item]; L.set(kBorr(S.bodega), b);
+  return d;
+}
+function actualizarBoton(h) { $('enviar').textContent = `Enviar conteo (${h})`; $('enviar').disabled = !h; }
+function refrescar(card, d, desdeInput) {
+  if (!desdeInput) card.querySelectorAll('input').forEach(i => i.value = (d.c || [])[+i.dataset.k] ?? '');
+  card.classList.toggle('hecho', contado(d));
+  card.querySelector('[data-a="cero"]').setAttribute('aria-pressed', !!d.cero);
+  const borr = L.get(kBorr(S.bodega), {}), h = cfg().items.filter(i => contado(borr[i.item])).length;
+  $('nHechos').textContent = h; actualizarBoton(h);
+}
+function enlazar() {
+  $('main').querySelectorAll('.item').forEach(card => {
+    const item = card.dataset.i;
+    card.querySelectorAll('[data-a="mas"],[data-a="menos"]').forEach(btn => btn.onclick = () => {
+      const k = +btn.dataset.k;
+      const d = guardar(item, d => { const v = d.c[k]; d.c[k] = btn.dataset.a === 'mas' ? (v || 0) + 1 : Math.max(0, (v ?? 1) - 1); d.cero = false; });
+      refrescar(card, d);
+    });
+    card.querySelectorAll('input').forEach(inp => inp.oninput = () => {
+      const k = +inp.dataset.k, v = inp.value === '' ? null : Math.max(0, Math.floor(Number(inp.value)));
+      const d = guardar(item, d => { d.c[k] = (v === null || isNaN(v)) ? null : v; d.cero = false; });
+      refrescar(card, d, true);
+    });
+    card.querySelector('[data-a="cero"]').onclick = () => {
+      const d = guardar(item, d => { d.cero = !d.cero; d.c = d.cero ? [] : d.c; });
+      refrescar(card, d);
+    };
+  });
+}
+$('atras').onclick = inicio;
+
+/* ---------- Enviar ---------- */
+$('enviar').onclick = () => {
+  const c = cfg(), borr = L.get(kBorr(S.bodega), {});
+  const lineas = c.items.filter(i => contado(borr[i.item])).map(i => {
+    const d = borr[i.item], cant = i.formatos.map((_, k) => d.cero ? 0 : (d.c[k] || 0));
+    return { item: i.item, cantidades: cant,
+      _txt: d.cero ? 'No hay' : i.formatos.map((f, k) => cant[k] ? `${cant[k]} ${f.nombre}` : '').filter(Boolean).join(' + ') || '0' };
+  });
+  const faltan = c.items.filter(i => !contado(borr[i.item])).map(i => i.item);
+  abrirModal(`<h3>Confirmar conteo · ${esc(corto(S.bodega))}</h3>
+    <ul>${lineas.map(l => `<li><b>${esc(l.item)}:</b> ${esc(l._txt)}</li>`).join('')}</ul>
+    ${faltan.length ? `<div class="aviso warn">Sin contar (no se registran): ${esc(faltan.join(', '))}</div>` : ''}
+    <div class="acciones"><button class="sec" id="mVolver">Volver</button><button class="pri" id="mOk">Confirmar y enviar</button></div>`);
+  $('mVolver').onclick = cerrarModal;
+  $('mOk').onclick = () => {
+    const { fecha, hora } = ahora();
+    const env = { id: uid(), c: L.get(K.cod, ''), bodega: S.bodega, persona: L.get(K.per, ''), fecha, hora,
+      lineas: lineas.map(l => ({ item: l.item, cantidades: l.cantidades })) };
+    L.set(K.cola, cola().concat([env]));
+    localStorage.removeItem(kBorr(S.bodega));
+    cerrarModal();
+    const b = S.bodega;
+    $('main').innerHTML = `<div class="aviso ${navigator.onLine ? 'ok' : 'warn'}">${navigator.onLine
+      ? '✓ Enviando… Puedes cerrar la app: si la señal falla, se reintenta sola.'
+      : '✓ Guardado en el teléfono. Se enviará solo apenas haya señal (por ejemplo, al subir de la bodega). Abre la app un momento cuando tengas señal.'}</div>
+      <button class="bodega-btn" id="aInicio">Ir a la lista de bodegas</button>`;
+    $('barra').hidden = true;
+    $('aInicio').onclick = inicio;
+    sincronizar();
+  };
+};
+
+/* ---------- Arranque ---------- */
+(async function () {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
+  history.replaceState(null, '', location.pathname);
+  pintarRed();
+  inicio();
+  if (!cfg()) pedirCodigo();
+  else { refrescarConfig(); sincronizar(); }
+})();
+</script>
+</body>
+</html>
