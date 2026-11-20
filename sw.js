@@ -1,5 +1,5 @@
 /* Service worker: guarda la app en el teléfono para que abra sin señal. Sube VERSION al publicar cambios. */
-const VERSION = 'andes-terreno-v3.1';
+const VERSION = 'andes-terreno-v3.1.1';
 const ARCHIVOS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

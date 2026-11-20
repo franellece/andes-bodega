@@ -142,13 +142,13 @@ function verCola() {
 
 /* ---------- Configuración ---------- */
 async function traerConfig(codigo) {
-  const res = await fetch(`${RECEPTOR}?accion=config&c=${encodeURIComponent(codigo)}`);
+  const res = await fetch(`${RECEPTOR}?accion=config&codigo=${encodeURIComponent(codigo)}`);
   const r = await res.json();
   if (!r.ok) { const e = new Error(r.error); e.codigo = r.codigo; throw e; }
   L.set(K.cod, codigo);
   L.set(K.cfg, { bodegas: r.bodegas, items: r.items, equipo: r.equipo, actualizado: r.actualizado });
   // Envíos detenidos por código antiguo: se reenvían con el nuevo
-  L.set(K.cola, cola().map(e => Object.assign({}, e, { c: codigo })));
+  L.set(K.cola, cola().map(e => Object.assign({}, e, { codigo: codigo })));
   return cfg();
 }
 function pedirCodigo(msg) {
@@ -298,7 +298,7 @@ $('enviar').onclick = () => {
   $('mVolver').onclick = cerrarModal;
   $('mOk').onclick = () => {
     const { fecha, hora } = ahora();
-    const env = { id: uid(), c: L.get(K.cod, ''), bodega: S.bodega, persona: L.get(K.per, ''), fecha, hora,
+    const env = { id: uid(), codigo: L.get(K.cod, ''), bodega: S.bodega, persona: L.get(K.per, ''), fecha, hora,
       lineas: lineas.map(l => ({ item: l.item, cantidades: l.cantidades })) };
     L.set(K.cola, cola().concat([env]));
     localStorage.removeItem(kBorr(S.bodega));
